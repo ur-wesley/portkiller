@@ -1,0 +1,31 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Install frontend deps
+        run: bun install --frozen-lockfile
+      - name: Frontend tests
+        run: bun test
+      - name: Frontend build
+        run: bun run build
+      - name: Rust tests
+        run: cargo test -p portkiller-core
+      - name: CLI smoke test
+        run: cargo run -p portkiller-cli -- list --json
+      - name: Tauri build
+        run: bun run tauri build
+        env:
+          CI: true

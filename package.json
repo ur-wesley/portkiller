@@ -1,0 +1,47 @@
+{
+	"name": "portkiller-win",
+	"version": "0.1.0",
+	"description": "Windows port management — CLI + system tray",
+	"license": "MIT",
+	"type": "module",
+	"scripts": {
+		"dev": "vite",
+		"build": "vite build",
+		"preview": "vite preview",
+		"tauri": "tauri",
+		"test": "vitest run",
+		"lint": "oxlint . && oxfmt --check .",
+		"format": "oxfmt --write ."
+	},
+	"dependencies": {
+		"@kobalte/core": "^0.13.11",
+		"@solid-primitives/i18n": "^2.2.1",
+		"@tanstack/solid-query": "^5.101.0",
+		"@tauri-apps/api": "^2.11.0",
+		"@tauri-apps/plugin-autostart": "^2.5.1",
+		"@tauri-apps/plugin-opener": "^2.5.4",
+		"class-variance-authority": "^0.7.1",
+		"clsx": "^2.1.1",
+		"neverthrow": "^8.2.0",
+		"remeda": "^2.39.0",
+		"solid-js": "^1.9.13",
+		"tailwind-merge": "^3.6.0",
+		"ts-pattern": "^5.9.0"
+	},
+	"engines": {
+		"bun": ">=1.1.0"
+	},
+	"packageManager": "bun@1.3.13",
+	"devDependencies": {
+		"@tailwindcss/vite": "^4.3.0",
+		"@tauri-apps/cli": "^2.11.2",
+		"jsdom": "^29.1.1",
+		"oxfmt": "^0.51.0",
+		"oxlint": "^1.51.0",
+		"tailwindcss": "^4.3.0",
+		"typescript": "~6.0.3",
+		"vite": "^6.4.3",
+		"vite-plugin-solid": "^2.11.12",
+		"vitest": "^3.2.6"
+	}
+}
