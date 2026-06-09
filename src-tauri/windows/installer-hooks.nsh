@@ -11,6 +11,5 @@
   StrCpy $1 "$INSTDIR"
   StrCpy $2 "$0;$1"
   WriteRegExpandStr HKCU "Environment" "Path" "$2"
-  DeleteRegValue HKCU "Environment" "PATH"
   System::Call 'user32::SendMessageTimeout(i 0xffff, i 0x001A, i 0, t "Environment", i 0x0002, i 5000, *i .r0)'
 !macroend

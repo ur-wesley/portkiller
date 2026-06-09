@@ -1,17 +1,7 @@
 use std::env;
-use std::ffi::OsStr;
-use std::io;
-use std::os::windows::ffi::OsStrExt;
-
-use winreg::enums::*;
-use winreg::types::FromRegValue;
-use winreg::{RegKey, RegValue};
+use std::process::Command;
 
 use crate::models::{AppError, PathStatus};
-
-const ENVIRONMENT: &str = "Environment";
-const PATH_VALUE: &str = "Path";
-const LEGACY_PATH_VALUE: &str = "PATH";
 
 pub fn get_install_dir() -> String {
     env::current_exe()
@@ -48,7 +38,6 @@ pub fn add_to_path(dir: &str) -> Result<(), AppError> {
         return Ok(());
     }
     write_user_path_string(&append_segment(&current, &dir))?;
-    broadcast_environment_change();
     Ok(())
 }
 
@@ -56,54 +45,37 @@ pub fn remove_from_path(dir: &str) -> Result<(), AppError> {
     let dir = normalize_segment(dir);
     let current = read_user_path_string()?;
     write_user_path_string(&remove_path_segment(&current, &dir))?;
-    broadcast_environment_change();
     Ok(())
 }
 
 fn read_user_path_string() -> Result<String, AppError> {
-    let hkcu = RegKey::predef(HKEY_CURRENT_USER);
-    let env = hkcu
-        .open_subkey(ENVIRONMENT)
-        .map_err(|e| AppError::Io(e.into()))?;
-
-    match read_path_value(&env, PATH_VALUE)? {
-        Some(value) if !value.is_empty() => Ok(value),
-        _ => Ok(read_path_value(&env, LEGACY_PATH_VALUE)?.unwrap_or_default()),
-    }
-}
-
-fn read_path_value(env: &RegKey, value_name: &str) -> Result<Option<String>, AppError> {
-    match env.get_raw_value(value_name) {
-        Ok(reg_value) => decode_path_string(&reg_value).map(Some),
-        Err(e) if e.kind() == io::ErrorKind::NotFound => Ok(None),
-        Err(e) => Err(AppError::Io(e)),
-    }
-}
-
-fn decode_path_string(reg_value: &RegValue) -> Result<String, AppError> {
-    match reg_value.vtype {
-        REG_SZ | REG_EXPAND_SZ => String::from_reg_value(reg_value).map_err(|e| AppError::Io(e)),
-        _ => Err(AppError::Other("unsupported registry type for Path".into())),
-    }
+    run_powershell("[Environment]::GetEnvironmentVariable('Path', 'User')")
 }
 
 fn write_user_path_string(value: &str) -> Result<(), AppError> {
-    let hkcu = RegKey::predef(HKEY_CURRENT_USER);
-    let (env, _) = hkcu
-        .create_subkey(ENVIRONMENT)
-        .map_err(|e| AppError::Io(e.into()))?;
+    let escaped = ps_escape(value);
+    run_powershell(&format!(
+        "[Environment]::SetEnvironmentVariable('Path', '{escaped}', 'User')"
+    ))?;
+    Ok(())
+}
 
-    let reg_value = RegValue {
-        bytes: encode_utf16(value),
-        vtype: REG_EXPAND_SZ,
-    };
-
-    env.set_raw_value(PATH_VALUE, &reg_value)
+fn run_powershell(script: &str) -> Result<String, AppError> {
+    let output = Command::new("powershell")
+        .args(["-NoProfile", "-NonInteractive", "-Command", script])
+        .output()
         .map_err(|e| AppError::Io(e))?;
 
-    let _ = env.delete_value(LEGACY_PATH_VALUE);
+    if !output.status.success() {
+        let stderr = String::from_utf8_lossy(&output.stderr);
+        return Err(AppError::Other(format!("powershell failed: {stderr}")));
+    }
 
-    Ok(())
+    Ok(String::from_utf8_lossy(&output.stdout).trim().to_string())
+}
+
+fn ps_escape(value: &str) -> String {
+    value.replace('\'', "''")
 }
 
 fn append_segment(current: &str, dir: &str) -> String {
@@ -147,33 +119,6 @@ fn normalize_segment(path: &str) -> String {
     path.trim().trim_end_matches('\\').to_string()
 }
 
-fn encode_utf16(value: &str) -> Vec<u8> {
-    OsStr::new(value)
-        .encode_wide()
-        .chain(std::iter::once(0))
-        .flat_map(|unit| unit.to_le_bytes())
-        .collect()
-}
-
-fn broadcast_environment_change() {
-    let param = "Environment";
-    let wide: Vec<u16> = OsStr::new(param).encode_wide().chain(Some(0)).collect();
-    unsafe {
-        use windows_sys::Win32::UI::WindowsAndMessaging::{
-            SendMessageTimeoutW, HWND_BROADCAST, SMTO_ABORTIFHUNG, WM_SETTINGCHANGE,
-        };
-        SendMessageTimeoutW(
-            HWND_BROADCAST,
-            WM_SETTINGCHANGE,
-            0,
-            wide.as_ptr() as isize,
-            SMTO_ABORTIFHUNG,
-            1000,
-            std::ptr::null_mut(),
-        );
-    }
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -213,5 +158,10 @@ mod tests {
             remove_path_segment("C:\\Tools;C:\\PortKiller", "C:\\PortKiller"),
             "C:\\Tools"
         );
+    }
+
+    #[test]
+    fn ps_escape_doubles_single_quotes() {
+        assert_eq!(ps_escape("C:\\it's"), "C:\\it''s");
     }
 }
