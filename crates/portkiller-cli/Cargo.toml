@@ -1,0 +1,17 @@
+[package]
+name = "portkiller-cli"
+version.workspace = true
+edition.workspace = true
+
+[[bin]]
+name = "portkiller"
+path = "src/main.rs"
+
+[lib]
+name = "portkiller_cli"
+path = "src/lib.rs"
+
+[dependencies]
+clap = { version = "4", features = ["derive"] }
+portkiller-core = { path = "../portkiller-core" }
+serde_json = "1"
