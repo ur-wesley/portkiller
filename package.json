@@ -11,7 +11,8 @@
 		"tauri": "tauri",
 		"test": "vitest run",
 		"lint": "oxlint . && oxfmt --check .",
-		"format": "oxfmt --write ."
+		"format": "oxfmt --write .",
+		"release": "bumpp"
 	},
 	"dependencies": {
 		"@kobalte/core": "^0.13.11",
@@ -35,6 +36,7 @@
 	"devDependencies": {
 		"@tailwindcss/vite": "^4.3.0",
 		"@tauri-apps/cli": "^2.11.2",
+		"bumpp": "^11.1.0",
 		"jsdom": "^29.1.1",
 		"oxfmt": "^0.51.0",
 		"oxlint": "^1.51.0",
