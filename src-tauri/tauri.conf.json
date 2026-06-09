@@ -1,0 +1,60 @@
+{
+	"$schema": "https://schema.tauri.app/config/2",
+	"productName": "PortKiller",
+	"version": "0.1.0",
+	"identifier": "com.parac.portkiller",
+	"build": {
+		"beforeDevCommand": "bun run dev",
+		"devUrl": "http://localhost:1444",
+		"beforeBuildCommand": "bun run build",
+		"frontendDist": "../dist"
+	},
+	"app": {
+		"windows": [
+			{
+				"label": "main",
+				"title": "PortKiller",
+				"width": 420,
+				"height": 640,
+				"visible": false,
+				"decorations": false,
+				"shadow": true,
+				"skipTaskbar": true,
+				"alwaysOnTop": true,
+				"resizable": false
+			}
+		],
+		"security": {
+			"csp": null
+		}
+	},
+	"plugins": {
+		"updater": {
+			"pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IEFGMjA3ODQ0RUYyMDQ4MwpSV1NEQlBKT2hBZnlDcFpmcG9iSlc3eXVjQUppaVp0WHVvM1VZSjd6TnNLZEZDakVUTUo0KzgwVAo=",
+			"endpoints": [
+				"https://github.com/ur-wesley/portkiller/releases/latest/download/latest.json"
+			]
+		}
+	},
+	"bundle": {
+		"active": true,
+		"createUpdaterArtifacts": true,
+		"targets": ["nsis"],
+		"icon": [
+			"icons/32x32.png",
+			"icons/128x128.png",
+			"icons/128x128@2x.png",
+			"icons/icon.icns",
+			"icons/icon.ico"
+		],
+		"windows": {
+			"wix": {
+				"fragmentPaths": ["windows/fragments/path-env.wxs"],
+				"componentRefs": ["PathEnvVarComponent"]
+			},
+			"nsis": {
+				"installerHooks": "windows/installer-hooks.nsh"
+			}
+		}
+	}
+}
