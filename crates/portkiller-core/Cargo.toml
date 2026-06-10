@@ -22,3 +22,4 @@ windows-sys = { version = "0.59", features = [
 	"Win32_System_Diagnostics_ToolHelp",
 ] }
 wmi = "0.14"
+winreg = "0.55"
