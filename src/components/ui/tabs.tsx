@@ -1,36 +1,36 @@
+import { Tabs as KobalteTabs, useTabsContext } from "@kobalte/core/tabs";
 import {
-	createContext,
-	createSignal,
 	splitProps,
-	useContext,
 	type Component,
 	type JSX,
 } from "solid-js";
 import { cn } from "../../lib/utils";
 
-const TabsContext = createContext<{
-	value: () => string;
-	setValue: (v: string) => void;
-}>();
-
 export function useTabs() {
-	const ctx = useContext(TabsContext);
-	if (!ctx) throw new Error("useTabs must be used within Tabs");
-	return ctx;
+	const ctx = useTabsContext();
+	return {
+		value: () => String(ctx.listState().selectedKey() ?? ""),
+		setValue: (v: string) => {
+			ctx.listState().selectionManager().setSelectedKeys([v]);
+		},
+	};
 }
 
 export const Tabs: Component<{
-	defaultValue: string;
+	defaultValue?: string;
+	value?: string;
+	onChange?: (value: string) => void;
 	class?: string;
 	children: JSX.Element;
 }> = (props) => {
-	const [value, setValue] = createSignal(props.defaultValue);
+	const [local, rest] = splitProps(props, ["class", "children"]);
 	return (
-		<TabsContext.Provider value={{ value, setValue }}>
-			<div class={cn("flex h-full min-h-0 flex-col", props.class)}>
-				{props.children}
-			</div>
-		</TabsContext.Provider>
+		<KobalteTabs
+			class={cn("flex h-full min-h-0 flex-col", local.class)}
+			{...rest}
+		>
+			{local.children}
+		</KobalteTabs>
 	);
 };
 
@@ -39,8 +39,11 @@ export const TabsList: Component<JSX.HTMLAttributes<HTMLDivElement>> = (
 ) => {
 	const [local, rest] = splitProps(props, ["class"]);
 	return (
-		<div
-			class={cn("flex gap-1 border-b border-zinc-800 px-3 pt-3", local.class)}
+		<KobalteTabs.List
+			class={cn(
+				"flex h-10 w-full items-center rounded-lg border border-white/8 bg-zinc-900/45 p-1 text-zinc-400 backdrop-blur-md",
+				local.class,
+			)}
 			{...rest}
 		/>
 	);
@@ -51,22 +54,18 @@ export const TabsTrigger: Component<{
 	class?: string;
 	children: JSX.Element;
 }> = (props) => {
-	const ctx = useContext(TabsContext)!;
-	const active = () => ctx.value() === props.value;
+	const [local, rest] = splitProps(props, ["class", "children", "value"]);
 	return (
-		<button
-			type="button"
+		<KobalteTabs.Trigger
+			value={local.value}
 			class={cn(
-				"rounded-t-md px-3 py-2 text-sm transition-colors",
-				active()
-					? "bg-zinc-900 text-zinc-100"
-					: "text-zinc-400 hover:text-zinc-200",
-				props.class,
+				"flex h-8 w-full min-w-0 items-center justify-center whitespace-nowrap rounded-md px-3 text-sm font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500 disabled:pointer-events-none disabled:opacity-50 data-[selected]:bg-zinc-950/75 data-[selected]:text-zinc-100 data-[selected]:shadow-sm",
+				local.class,
 			)}
-			onClick={() => ctx.setValue(props.value)}
+			{...rest}
 		>
-			{props.children}
-		</button>
+			{local.children}
+		</KobalteTabs.Trigger>
 	);
 };
 
@@ -75,16 +74,17 @@ export const TabsContent: Component<{
 	class?: string;
 	children: JSX.Element;
 }> = (props) => {
-	const ctx = useContext(TabsContext)!;
+	const [local, rest] = splitProps(props, ["class", "children", "value"]);
 	return (
-		<div
+		<KobalteTabs.Content
+			value={local.value}
 			class={cn(
-				"min-h-0 flex-1 overflow-hidden",
-				props.class,
-				ctx.value() !== props.value && "hidden",
+				"min-h-0 flex-1 overflow-hidden focus-visible:outline-none",
+				local.class,
 			)}
+			{...rest}
 		>
-			{props.children}
-		</div>
+			{local.children}
+		</KobalteTabs.Content>
 	);
 };

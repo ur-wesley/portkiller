@@ -6,8 +6,8 @@ import { Switch } from "../../components/ui/switch";
 import { Input } from "../../components/ui/input";
 import { Button } from "../../components/ui/button";
 import { invokeResult } from "../../lib/api/invoke";
-import type { AppSettings, PathStatus, UpdateInfo } from "../../lib/api/types";
-import { pathKeys, settingsKeys } from "../../lib/query/keys";
+import type { AppSettings, UpdateInfo } from "../../lib/api/types";
+import { settingsKeys } from "../../lib/query/keys";
 import pkg from "../../../package.json";
 
 export function SettingsPanel() {
@@ -23,15 +23,6 @@ export function SettingsPanel() {
 		queryKey: settingsKeys.all,
 		queryFn: async () => {
 			const result = await invokeResult<AppSettings>("get_settings");
-			if (result.isErr()) throw new Error(result.error);
-			return result.value;
-		},
-	}));
-
-	const pathQuery = useQuery(() => ({
-		queryKey: pathKeys.all,
-		queryFn: async () => {
-			const result = await invokeResult<PathStatus>("path_status_cmd");
 			if (result.isErr()) throw new Error(result.error);
 			return result.value;
 		},
@@ -93,23 +84,10 @@ export function SettingsPanel() {
 		}
 	};
 
-	const togglePath = async (checked: boolean) => {
-		const cmd = checked ? "path_add" : "path_remove";
-		const result = await invokeResult<void>(cmd);
-		if (result.isErr()) {
-			setMessage(result.error);
-			return;
-		}
-		await update({ add_to_path: checked });
-		void queryClient.invalidateQueries({ queryKey: pathKeys.all });
-		setMessage(checked ? t("settings.pathAdded") : t("settings.pathRemoved"));
-		setTimeout(() => setMessage(null), 3000);
-	};
-
 	return (
 		<div class="space-y-4 p-4 text-sm">
 			<Show when={message()}>
-				<div class="rounded-md border border-zinc-700 bg-zinc-900 px-3 py-2 text-xs">
+				<div class="glass-surface rounded-md px-3 py-2 text-xs">
 					{message()}
 				</div>
 			</Show>
@@ -121,18 +99,32 @@ export function SettingsPanel() {
 				/>
 			</SettingRow>
 
-			<SettingRow label={t("settings.path")} hint={t("settings.pathHint")}>
+			<SettingRow
+				label={t("settings.monitoringEnabled")}
+				hint={t("settings.monitoringEnabledHint")}
+			>
 				<Switch
-					checked={
-						pathQuery.data?.in_path ?? settingsQuery.data?.add_to_path ?? false
-					}
-					onChange={(checked) => void togglePath(checked)}
+					checked={settingsQuery.data?.monitoring_enabled ?? true}
+					onChange={(checked) => void update({ monitoring_enabled: checked })}
 				/>
 			</SettingRow>
 
-			<SettingRow label={t("settings.startMinimized")}>
+			<SettingRow
+				label={t("settings.closeToTray")}
+				hint={t("settings.closeToTrayHint")}
+			>
 				<Switch
-					checked={settingsQuery.data?.start_minimized ?? true}
+					checked={settingsQuery.data?.close_to_tray ?? true}
+					onChange={(checked) => void update({ close_to_tray: checked })}
+				/>
+			</SettingRow>
+
+			<SettingRow
+				label={t("settings.startMinimized")}
+				hint={t("settings.startMinimizedHint")}
+			>
+				<Switch
+					checked={settingsQuery.data?.start_minimized ?? false}
 					onChange={(checked) => void update({ start_minimized: checked })}
 				/>
 			</SettingRow>
@@ -144,7 +136,7 @@ export function SettingsPanel() {
 				/>
 			</SettingRow>
 
-			<div class="space-y-2 rounded-md border border-zinc-800 p-3">
+			<div class="glass-surface space-y-2 rounded-md p-3">
 				<p class="text-xs text-zinc-500">
 					{t("settings.version", { version: pkg.version })}
 				</p>
@@ -182,12 +174,6 @@ export function SettingsPanel() {
 					}
 				/>
 			</SettingRow>
-
-			<Show when={pathQuery.data?.install_dir}>
-				<p class="text-xs text-zinc-500">
-					Install dir: {pathQuery.data?.install_dir}
-				</p>
-			</Show>
 		</div>
 	);
 }

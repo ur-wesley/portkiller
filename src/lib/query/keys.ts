@@ -5,7 +5,3 @@ export const portKeys = {
 export const settingsKeys = {
 	all: ["settings"] as const,
 };
-
-export const pathKeys = {
-	all: ["path-status"] as const,
-};

@@ -6,7 +6,7 @@ export const Card: Component<JSX.HTMLAttributes<HTMLDivElement>> = (props) => {
 	return (
 		<div
 			class={cn(
-				"rounded-lg border border-zinc-800 bg-zinc-950 text-zinc-100",
+				"glass-surface rounded-lg text-zinc-100",
 				local.class,
 			)}
 			{...rest}

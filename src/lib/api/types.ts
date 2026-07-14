@@ -12,18 +12,19 @@ export interface AppSettings {
 	refresh_interval_secs: number;
 	start_minimized: boolean;
 	autostart: boolean;
-	add_to_path: boolean;
+	close_to_tray: boolean;
+	monitoring_enabled: boolean;
 	locale: string;
 	auto_check_updates: boolean;
+}
+
+export interface MonitoringStatus {
+	active: boolean;
+	last_updated_ms: number | null;
 }
 
 export interface UpdateInfo {
 	version: string;
 	currentVersion: string;
 	notes: string;
-}
-
-export interface PathStatus {
-	in_path: boolean;
-	install_dir: string;
 }

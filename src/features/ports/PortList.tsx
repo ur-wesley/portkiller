@@ -2,7 +2,6 @@ import { getCurrentWindow } from "@tauri-apps/api/window";
 import { createMemo, createSignal, onCleanup, onMount, Show } from "solid-js";
 import { useTabs } from "../../components/ui/tabs";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/solid-query";
-import { AlertDialog } from "../../components/ui/alert-dialog";
 import { Card, CardContent } from "../../components/ui/card";
 import { ScrollArea } from "../../components/ui/scroll-area";
 import { invokeResult } from "../../lib/api/invoke";
@@ -14,6 +13,8 @@ import { filterPorts } from "./filter";
 import { PortRow } from "./PortRow";
 import { SearchBar } from "./SearchBar";
 import { usePortsQuery } from "./usePortsQuery";
+
+const KILL_ARM_MS = 3000;
 
 export function PortList(props: { favoritesOnly?: boolean }) {
 	const t = useT();
@@ -29,14 +30,29 @@ export function PortList(props: { favoritesOnly?: boolean }) {
 		if (isActiveTab()) searchInput?.focus();
 	};
 
-	onMount(async () => {
-		const window = getCurrentWindow();
-		if (await window.isFocused()) focusSearch();
+	onMount(() => {
+		let unlisten: (() => void) | undefined;
+		let disposed = false;
 
-		const unlisten = await window.onFocusChanged(({ payload: focused }) => {
-			if (focused) focusSearch();
+		void (async () => {
+			const window = getCurrentWindow();
+			if (await window.isFocused()) focusSearch();
+
+			const stop = await window.onFocusChanged(({ payload: focused }) => {
+				if (focused) focusSearch();
+			});
+
+			if (disposed) {
+				stop();
+				return;
+			}
+			unlisten = stop;
+		})();
+
+		onCleanup(() => {
+			disposed = true;
+			unlisten?.();
 		});
-		onCleanup(unlisten);
 	});
 	const queryClient = useQueryClient();
 	const portsQuery = usePortsQuery();
@@ -53,8 +69,17 @@ export function PortList(props: { favoritesOnly?: boolean }) {
 	}));
 
 	const [search, setSearch] = createSignal("");
-	const [pendingKill, setPendingKill] = createSignal<PortInfo | null>(null);
+	const [armedKillPort, setArmedKillPort] = createSignal<number | null>(null);
 	const [toast, setToast] = createSignal<string | null>(null);
+	let armTimeout: ReturnType<typeof setTimeout> | undefined;
+
+	const disarmKill = () => {
+		setArmedKillPort(null);
+		if (armTimeout) clearTimeout(armTimeout);
+		armTimeout = undefined;
+	};
+
+	onCleanup(disarmKill);
 
 	const filtered = createMemo(() =>
 		filterPorts(
@@ -85,10 +110,22 @@ export function PortList(props: { favoritesOnly?: boolean }) {
 					}),
 				);
 			}
-			setPendingKill(null);
+			disarmKill();
 			setTimeout(() => setToast(null), 2500);
 		},
 	}));
+
+	const handleKillClick = (port: PortInfo) => {
+		if (armedKillPort() === port.port) {
+			disarmKill();
+			killMutation.mutate(port);
+			return;
+		}
+
+		setArmedKillPort(port.port);
+		if (armTimeout) clearTimeout(armTimeout);
+		armTimeout = setTimeout(disarmKill, KILL_ARM_MS);
+	};
 
 	const favoriteMutation = useMutation(() => ({
 		mutationFn: async (port: number) => {
@@ -101,8 +138,6 @@ export function PortList(props: { favoritesOnly?: boolean }) {
 		},
 	}));
 
-	const pending = () => pendingKill();
-
 	return (
 		<div class="flex h-full min-h-0 flex-col gap-3 p-3">
 			<SearchBar
@@ -114,11 +149,11 @@ export function PortList(props: { favoritesOnly?: boolean }) {
 				onInput={setSearch}
 			/>
 			<Show when={toast()}>
-				<div class="rounded-md border border-zinc-700 bg-zinc-900 px-3 py-2 text-xs text-zinc-200">
+				<div class="glass-surface rounded-md px-3 py-2 text-xs text-zinc-200">
 					{toast()}
 				</div>
 			</Show>
-			<ScrollArea class="min-h-0 flex-1 rounded-md border border-zinc-800">
+			<ScrollArea class="glass-surface min-h-0 flex-1 rounded-md">
 				<Show
 					when={filtered().length > 0}
 					fallback={
@@ -135,25 +170,16 @@ export function PortList(props: { favoritesOnly?: boolean }) {
 							isFavorite={(settingsQuery.data?.favorites ?? []).includes(
 								port.port,
 							)}
+							killArmed={armedKillPort() === port.port}
 							killLabel={t("ports.kill")}
-							onKill={setPendingKill}
+							killConfirmLabel={t("ports.killConfirm")}
+							favoriteLabel={t("ports.favorite")}
+							onKillClick={() => handleKillClick(port)}
 							onToggleFavorite={(p) => favoriteMutation.mutate(p)}
 						/>
 					))}
 				</Show>
 			</ScrollArea>
-			<AlertDialog
-				open={pending() !== null}
-				title={t("ports.confirmTitle")}
-				description={`Stop the process on port ${pending()?.port ?? ""}?`}
-				confirmLabel={t("ports.kill")}
-				cancelLabel={t("ports.cancel")}
-				onCancel={() => setPendingKill(null)}
-				onConfirm={() => {
-					const target = pending();
-					if (target) killMutation.mutate(target);
-				}}
-			/>
 		</div>
 	);
 }

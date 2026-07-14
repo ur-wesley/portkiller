@@ -1,5 +1,5 @@
-import { flatten, translator } from "@solid-primitives/i18n";
-import { createContext, createMemo, useContext } from "solid-js";
+import { flatten, resolveTemplate, translator } from "@solid-primitives/i18n";
+import { createContext, useContext } from "solid-js";
 import { en, type Dictionary } from "./dictionaries/en";
 
 type FlatDict = ReturnType<typeof flatten<Dictionary>>;
@@ -7,9 +7,10 @@ type FlatDict = ReturnType<typeof flatten<Dictionary>>;
 export const I18nContext =
 	createContext<ReturnType<typeof translator<FlatDict>>>();
 
+const flatDict = flatten(en);
+
 export function createAppI18n() {
-	const dict = createMemo(() => flatten(en));
-	const t = translator(dict);
+	const t = translator(() => flatDict, resolveTemplate);
 	return { t };
 }
 

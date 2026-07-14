@@ -33,4 +33,14 @@ describe("filterPorts", () => {
 		expect(result).toHaveLength(1);
 		expect(result[0]?.port).toBe(3000);
 	});
+
+	it("sorts favorites first then by port number", () => {
+		const ports: PortInfo[] = [
+			{ ...sample[1]!, port: 8080 },
+			{ ...sample[0]!, port: 3000 },
+			{ ...sample[0]!, port: 4000, pid: 3, process_name: "other.exe" },
+		];
+		const result = filterPorts(ports, "", false, [4000, 3000]);
+		expect(result.map((p) => p.port)).toEqual([3000, 4000, 8080]);
+	});
 });

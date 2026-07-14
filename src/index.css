@@ -15,8 +15,32 @@ body,
 	height: 100%;
 	margin: 0;
 	overflow: hidden;
+	background: transparent;
 }
 
 body {
-	background: #09090b;
+	background: transparent;
+}
+
+@layer utilities {
+	.glass-surface {
+		border: 1px solid rgb(255 255 255 / 0.08);
+		background: rgb(9 9 11 / 0.45);
+		backdrop-filter: blur(24px);
+		-webkit-backdrop-filter: blur(24px);
+	}
+
+	.glass-surface-strong {
+		border: 1px solid rgb(255 255 255 / 0.1);
+		background: rgb(9 9 11 / 0.62);
+		backdrop-filter: blur(32px);
+		-webkit-backdrop-filter: blur(32px);
+	}
+
+	.glass-surface-subtle {
+		border: 1px solid rgb(255 255 255 / 0.06);
+		background: rgb(9 9 11 / 0.28);
+		backdrop-filter: blur(16px);
+		-webkit-backdrop-filter: blur(16px);
+	}
 }

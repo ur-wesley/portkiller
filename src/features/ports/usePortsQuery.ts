@@ -8,12 +8,23 @@ import { portKeys } from "../../lib/query/keys";
 export function usePortsQuery() {
 	const queryClient = useQueryClient();
 
-	onMount(async () => {
-		const unlisten = await listen<PortInfo[]>("ports-updated", (event) => {
+	onMount(() => {
+		let unlisten: (() => void) | undefined;
+		let disposed = false;
+
+		void listen<PortInfo[]>("ports-updated", (event) => {
 			queryClient.setQueryData(portKeys.all, event.payload);
+		}).then((dispose) => {
+			if (disposed) {
+				void dispose();
+				return;
+			}
+			unlisten = dispose;
 		});
+
 		onCleanup(() => {
-			void unlisten();
+			disposed = true;
+			void unlisten?.();
 		});
 	});
 

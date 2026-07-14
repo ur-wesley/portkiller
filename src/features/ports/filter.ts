@@ -1,6 +1,13 @@
 import { filter, pipe, sortBy } from "remeda";
 import type { PortInfo } from "../../lib/api/types";
 
+export function sortPorts(ports: PortInfo[], favorites: number[]) {
+	return pipe(
+		ports,
+		sortBy((p) => [favorites.includes(p.port) ? 0 : 1, p.port] as const),
+	);
+}
+
 export function filterPorts(
 	ports: PortInfo[],
 	query: string,
@@ -19,6 +26,6 @@ export function filterPorts(
 				p.command.toLowerCase().includes(q)
 			);
 		}),
-		sortBy((p) => p.port),
+		(items) => sortPorts(items, favorites),
 	);
 }
