@@ -8,3 +8,6 @@ src-tauri/gen
 src-tauri/target
 .DS_Store
 *.log
+graphify-out/
+.zig-cache/
+zig-out/
