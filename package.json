@@ -1,6 +1,6 @@
 {
 	"name": "portkiller-win",
-	"version": "0.1.4",
+	"version": "0.1.5",
 	"description": "Windows port management — CLI + system tray",
 	"license": "MIT",
 	"type": "module",
