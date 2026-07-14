@@ -11,23 +11,19 @@ pub struct PortInfo {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
-pub struct PathStatus {
-    pub in_path: bool,
-    pub install_dir: String,
-}
-
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub struct AppSettings {
     #[serde(default = "default_favorites")]
     pub favorites: Vec<u16>,
     #[serde(default = "default_refresh")]
     pub refresh_interval_secs: u64,
-    #[serde(default = "default_true")]
+    #[serde(default)]
     pub start_minimized: bool,
     #[serde(default)]
     pub autostart: bool,
-    #[serde(default)]
-    pub add_to_path: bool,
+    #[serde(default = "default_true")]
+    pub close_to_tray: bool,
+    #[serde(default = "default_true")]
+    pub monitoring_enabled: bool,
     #[serde(default = "default_locale")]
     pub locale: String,
     #[serde(default = "default_true")]
@@ -55,9 +51,10 @@ impl Default for AppSettings {
         Self {
             favorites: default_favorites(),
             refresh_interval_secs: default_refresh(),
-            start_minimized: true,
+            start_minimized: false,
             autostart: false,
-            add_to_path: false,
+            close_to_tray: true,
+            monitoring_enabled: true,
             locale: default_locale(),
             auto_check_updates: true,
         }

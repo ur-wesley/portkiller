@@ -229,11 +229,14 @@ fn apply_setting(settings: &mut AppSettings, key: &str, value: &str) -> Result<(
         "start_minimized" => {
             settings.start_minimized = parse_bool(value)?;
         }
+        "close_to_tray" => {
+            settings.close_to_tray = parse_bool(value)?;
+        }
+        "monitoring_enabled" => {
+            settings.monitoring_enabled = parse_bool(value)?;
+        }
         "autostart" => {
             settings.autostart = parse_bool(value)?;
-        }
-        "add_to_path" => {
-            settings.add_to_path = parse_bool(value)?;
         }
         "locale" => {
             settings.locale = value.to_string();
