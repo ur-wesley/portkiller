@@ -4,7 +4,8 @@ use std::time::Duration;
 use sysinfo::{Pid, System};
 
 use crate::models::AppError;
-use crate::ports::scanner::scan_ports;
+
+use super::scanner::scan_ports;
 
 pub fn kill_pid(pid: u32, force: bool) -> Result<(), AppError> {
     if pid == 0 {

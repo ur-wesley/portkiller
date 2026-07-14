@@ -23,7 +23,7 @@ pub fn scan_ports() -> Result<Vec<PortInfo>, AppError> {
             continue;
         }
         let port = decode_port(row.dwLocalPort);
-        let pid = row.dwOwningPid as u32;
+        let pid = row.dwOwningPid;
         let address = Ipv4Addr::from(row.dwLocalAddr.to_le_bytes()).to_string();
         if let Some(info) = build_port_info(port, pid, address, &mut process_cache, &system) {
             ports.push(info);
@@ -35,7 +35,7 @@ pub fn scan_ports() -> Result<Vec<PortInfo>, AppError> {
             continue;
         }
         let port = decode_port(row.dwLocalPort);
-        let pid = row.dwOwningPid as u32;
+        let pid = row.dwOwningPid;
         let mut bytes = [0u8; 16];
         bytes.copy_from_slice(&row.ucLocalAddr[..16]);
         let address = Ipv6Addr::from(bytes).to_string();
