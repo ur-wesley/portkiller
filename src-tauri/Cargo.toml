@@ -13,7 +13,7 @@ tauri-build = { version = "2", features = [] }
 [dependencies]
 portkiller-core = { path = "../crates/portkiller-core" }
 portkiller-cli = { path = "../crates/portkiller-cli" }
-tauri = { version = "2", features = ["tray-icon"] }
+tauri = { version = "2", features = ["tray-icon", "macos-private-api"] }
 tauri-plugin-autostart = "2"
 tauri-plugin-positioner = { version = "2", features = ["tray-icon"] }
 tauri-plugin-opener = "2"

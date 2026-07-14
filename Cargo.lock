@@ -2846,13 +2846,13 @@ name = "portkiller-core"
 version = "0.1.4"
 dependencies = [
  "dirs 6.0.0",
+ "libc",
  "nucleo-matcher",
  "serde",
  "serde_json",
  "sysinfo",
  "thiserror 2.0.18",
  "windows-sys 0.59.0",
- "winreg 0.55.0",
  "wmi",
 ]
 

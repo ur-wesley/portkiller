@@ -1,7 +1,4 @@
-use portkiller_core::{
-    add_to_path, kill_pid, kill_port, path_status, remove_from_path, scan_ports, AppError,
-    AppSettings, PathStatus, PortInfo, Store,
-};
+use portkiller_core::{kill_pid, kill_port, scan_ports, AppError, AppSettings, PortInfo, Store};
 
 #[tauri::command]
 pub fn list_ports() -> Result<Vec<PortInfo>, String> {
@@ -40,23 +37,6 @@ pub fn toggle_favorite(port: u16) -> Result<Vec<u16>, String> {
         .map_err(|e| e.to_string())?
         .toggle_favorite(port)
         .map_err(|e| e.to_string())
-}
-
-#[tauri::command]
-pub fn path_status_cmd() -> Result<PathStatus, String> {
-    path_status().map_err(|e| e.to_string())
-}
-
-#[tauri::command]
-pub fn path_add() -> Result<(), String> {
-    let dir = portkiller_core::get_install_dir();
-    add_to_path(&dir).map_err(|e| e.to_string())
-}
-
-#[tauri::command]
-pub fn path_remove() -> Result<(), String> {
-    let dir = portkiller_core::get_install_dir();
-    remove_from_path(&dir).map_err(|e| e.to_string())
 }
 
 fn map_kill_error(err: AppError) -> String {
