@@ -11,7 +11,7 @@ Inspired by [productdevbook/port-killer](https://github.com/productdevbook/port-
 - Search/filter, favorites, auto-refresh
 - System tray with show/hide on close
 - Scriptable CLI with JSON output
-- Settings: autostart, add-to-PATH, refresh interval, start minimized
+- Settings: autostart, refresh interval, start minimized
 
 ## Quick start
 
@@ -67,9 +67,8 @@ Stored at `%APPDATA%/portkiller/config.json`:
 - `refresh_interval_secs` — tray auto-refresh (default 5)
 - `start_minimized` — launch to tray
 - `autostart` — start with Windows
-- `add_to_path` — add install dir to user PATH
 
-Toggle **Add to PATH** in Settings, then open a **new** terminal to run `portkiller list`.
+PATH is configured during installation. Open a **new** terminal after install to run `portkiller list`.
 
 ## Project structure
 
