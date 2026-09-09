@@ -43,6 +43,9 @@
 	"bundle": {
 		"active": true,
 		"createUpdaterArtifacts": true,
+		"resources": {
+			"windows/append-user-path.ps1": "append-user-path.ps1"
+		},
 		"targets": ["nsis", "dmg"],
 		"icon": [
 			"icons/32x32.png",
