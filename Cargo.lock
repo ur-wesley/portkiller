@@ -2834,7 +2834,7 @@ dependencies = [
 
 [[package]]
 name = "portkiller-cli"
-version = "0.1.4"
+version = "0.1.5"
 dependencies = [
  "clap",
  "portkiller-core",
@@ -2843,7 +2843,7 @@ dependencies = [
 
 [[package]]
 name = "portkiller-core"
-version = "0.1.4"
+version = "0.1.5"
 dependencies = [
  "dirs 6.0.0",
  "libc",
@@ -2858,7 +2858,7 @@ dependencies = [
 
 [[package]]
 name = "portkiller-win"
-version = "0.1.4"
+version = "0.1.5"
 dependencies = [
  "portkiller-cli",
  "portkiller-core",
