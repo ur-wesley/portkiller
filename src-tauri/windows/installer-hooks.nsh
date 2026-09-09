@@ -100,7 +100,7 @@ path_check_present:
   Push $3
   Call PortKillerStrStr
   Pop $4
-  StrCmp $4 "1" path_done 0 path_build_new
+  StrCmp $4 "1" path_done path_build_new
 
 path_build_new:
   StrCmp $1 "" 0 path_append
